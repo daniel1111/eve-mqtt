@@ -32,6 +32,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <stdint.h>
+
+#define MOSQ_MAX_PACKETS 100
 
 extern CLogging *log;
 
@@ -205,7 +208,7 @@ int CNHmqtt::mosq_connect()
   
   log->dbg("Connecting to Mosquitto as [" + out.str() + "]");;
   
-  mosq = mosquitto_new(out.str().c_str(), this);  
+  mosq = mosquitto_new(out.str().c_str(), true, this);  
   if(!mosq)
   {
     cout << "mosquitto_new() failed!";
@@ -216,7 +219,7 @@ int CNHmqtt::mosq_connect()
   mosquitto_message_callback_set(mosq, CNHmqtt::message_callback);  
   
     // int mosquitto_connect(struct mosquitto *mosq, const char *host, int port, int keepalive, bool clean_session);
-  if(mosquitto_connect(mosq, mosq_server.c_str(), mosq_port, 300, true)) 
+  if(mosquitto_connect(mosq, mosq_server.c_str(), mosq_port, 300)) //, true)) 
   {
     log->dbg("mosq_connnect failed!");
     mosquitto_destroy(mosq);
@@ -228,7 +231,7 @@ int CNHmqtt::mosq_connect()
   return 0;       
 }
 
-void CNHmqtt::connect_callback(void *obj, int result)
+void CNHmqtt::connect_callback(struct mosquitto *mosq, void *obj, int result)
 {
   CNHmqtt *m = (CNHmqtt*)obj;
 
@@ -242,7 +245,7 @@ void CNHmqtt::connect_callback(void *obj, int result)
   }
 }
 
-void CNHmqtt::message_callback(void *obj, const struct mosquitto_message *message)
+void CNHmqtt::message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message)
 {
   CNHmqtt *m = (CNHmqtt*)obj;
   string payload;
@@ -341,7 +344,7 @@ int CNHmqtt::message_loop(void)
   if (mosq==NULL)
     return -1;
   
-  while(!mosquitto_loop(mosq, 50)  && !terminate && !reset);
+  while(!mosquitto_loop(mosq, 50, MOSQ_MAX_PACKETS)  && !terminate && !reset);
   
   if (terminate)
     log->dbg("terminate=true");
@@ -369,7 +372,7 @@ int CNHmqtt::message_loop(void)
 
 int CNHmqtt::message_loop(int timeout)
 {
-  return mosquitto_loop(mosq, timeout);
+  return mosquitto_loop(mosq, timeout, MOSQ_MAX_PACKETS);
 }
 
 // Other stuff not mqtt / instrumentation specifc

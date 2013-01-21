@@ -19,7 +19,7 @@ sudo apt-get update
 ```
   
 * Install the required packages:  
-`sudo apt-get install i2c-tools libmosquitto0 libmosquitto0-dev libmosquittopp0 libmosquittopp0-dev mosquitto mosquitto-clients`  
+`sudo apt-get install i2c-tools libmosquitto1 libmosquitto1-dev mosquitto mosquitto-clients`  
   
 * Load the SPI & I2C modules, and give everyone read/write access:  
 ``` 

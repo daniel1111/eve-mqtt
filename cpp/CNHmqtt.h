@@ -47,8 +47,8 @@ class CNHmqtt
     string get_str_option(string section, string option, string def_value);
         
   private:
-    static void connect_callback(void *obj, int result);
-    static void message_callback(void *obj, const struct mosquitto_message *message);  
+    static void connect_callback(struct mosquitto *mosq, void *obj, int result);
+    static void message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message);  
     bool terminate;
     bool reset;
     bool config_file_parsed;
